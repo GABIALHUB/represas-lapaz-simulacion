@@ -3,155 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Represas La Paz | Métodos Numéricos</title>
+    <title>Telemetría y Modelado de Represas en La Paz | Métodos Numéricos</title>
+    
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <!-- KaTeX CSS & JS para fórmulas matemáticas perfectas en LaTeX -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
-        onload="renderMath();"></script>
+    
+    <!-- KaTeX CSS & JS (Motor de Renderizado Matemático de Alta Fidelidad) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
-            --purple-deep: #3b0764;
-            --purple-dark: #581c87;
-            --purple-primary: #7c3aed;
+            --purple-deep: #2e1065;
+            --purple-dark: #4c1d95;
+            --purple-primary: #6d28d9;
+            --purple-vibrant: #7c3aed;
             --purple-medium: #8b5cf6;
             --lila-accent: #a855f7;
             --lila-light: #c084fc;
             --lila-soft: #ede9fe;
             --bg-lavender: #f5f3ff;
-            --text-dark: #2e1065;
+            --card-border: #ddd6fe;
         }
 
         body {
             background-color: var(--bg-lavender);
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            color: #1f2937;
+            color: #1e1b4b;
         }
 
-        /* Navbar estilo Morado / Lila */
+        /* Navbar estilo Violeta / Lila */
         .navbar-custom {
-            background: linear-gradient(135deg, #3b0764 0%, #6b21a8 50%, #7c3aed 100%);
-            box-shadow: 0 4px 20px rgba(107, 33, 168, 0.25);
+            background: linear-gradient(135deg, #2e1065 0%, #4c1d95 40%, #7c3aed 100%);
+            box-shadow: 0 4px 20px rgba(76, 29, 149, 0.3);
         }
 
         .btn-purple {
-            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+            background: linear-gradient(135deg, #6d28d9 0%, #a855f7 100%);
             color: white;
             border: none;
-            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+            font-weight: 600;
             transition: all 0.25s ease;
         }
         .btn-purple:hover {
-            background: linear-gradient(135deg, #6d28d9 0%, #9333ea 100%);
+            background: linear-gradient(135deg, #5b21b6 0%, #9333ea 100%);
             color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(124, 58, 237, 0.35);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(124, 58, 237, 0.4);
         }
 
         .btn-outline-purple {
             border: 2px solid #8b5cf6;
-            color: #6d28d9;
-            background: transparent;
+            color: #5b21b6;
+            background: #ffffff;
             font-weight: 600;
             transition: all 0.2s ease;
         }
         .btn-outline-purple:hover {
             background: #8b5cf6;
             color: white;
+            transform: translateY(-1px);
         }
 
         .card-custom {
-            border: 1px solid #ddd6fe;
+            border: 1px solid var(--card-border);
             border-radius: 16px;
             box-shadow: 0 6px 20px rgba(109, 40, 217, 0.06);
             background: #ffffff;
+        }
+
+        .hero-banner {
+            background: linear-gradient(135deg, #ede9fe 0%, #fae8ff 100%);
+            border: 1px solid #c4b5fd;
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .math-display-box {
+            background: #ffffff;
+            border-left: 5px solid #7c3aed;
+            border: 1px solid #ddd6fe;
+            border-left-width: 5px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(124, 58, 237, 0.05);
+        }
+
+        .math-formula {
+            font-size: 1.25rem;
+            color: #4c1d95;
+            text-align: center;
+            margin: 12px 0;
+        }
+
+        .kpi-card {
+            border-radius: 14px;
+            padding: 18px;
+            border: 1px solid #ddd6fe;
+            background: #ffffff;
             transition: transform 0.2s;
         }
-
-        .math-box {
-            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
-            border-left: 5px solid #7c3aed;
-            padding: 16px 20px;
-            border-radius: 10px;
-            border: 1px solid #ddd6fe;
+        .kpi-card:hover {
+            transform: translateY(-3px);
         }
-
         .kpi-title {
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 700;
             color: #6b7280;
         }
         .kpi-value {
-            font-size: 1.85rem;
+            font-size: 2rem;
             font-weight: 800;
         }
 
-        .badge-purple {
-            background-color: #8b5cf6;
-            color: white;
-        }
         .badge-lila {
             background-color: #ede9fe;
-            color: #6d28d9;
-            font-weight: 600;
+            color: #5b21b6;
+            font-weight: 700;
             border: 1px solid #c4b5fd;
+            padding: 6px 14px;
+            border-radius: 20px;
         }
 
-        .section-header {
-            color: var(--purple-dark);
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-
-        .table-responsive {
-            max-height: 420px;
-            overflow-y: auto;
-        }
         .table-dark-purple {
-            background: linear-gradient(135deg, #4c1d95 0%, #6b21a8 100%);
+            background: linear-gradient(135deg, #3b0764 0%, #581c87 100%);
             color: white;
         }
         .table-dark-purple th {
-            color: white;
+            color: #ffffff;
             font-weight: 600;
-            border-color: #581c87;
+            border-color: #4c1d95;
         }
 
-        .accordion-button:not(.collapsed) {
-            background-color: #ede9fe;
-            color: #581c87;
-            font-weight: 700;
+        .table-variables th, .table-variables td {
+            vertical-align: middle;
+            padding: 10px 14px;
         }
-        .accordion-button:focus {
-            box-shadow: 0 0 0 0.25rem rgba(124, 58, 237, 0.25);
-            border-color: #c4b5fd;
+
+        .chart-container-box {
+            position: relative;
+            height: 380px;
+            width: 100%;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: #7c3aed;
+        }
+        .nav-pills .nav-link {
+            color: #5b21b6;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
 
-    <!-- Barra de Navegación Morada y Lila -->
+    <!-- BARRA DE NAVEGACIÓN -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom mb-4">
         <div class="container-fluid px-4">
             <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
-                <i class="fa-solid fa-water-ladder me-2 text-warning fs-4"></i> 
-                <span>EPSAS Telemetría · Represas de La Paz</span>
+                <i class="fa-solid fa-water-ladder me-2 text-warning fs-3"></i> 
+                <div>
+                    <span class="fs-5 d-block">EPSAS · Telemetría y Modelado de Represas Paceñas</span>
+                    <small class="text-light opacity-75" style="font-size: 0.75rem;">Métodos Numéricos · Heun & Runge-Kutta 4.º Orden</small>
+                </div>
             </a>
-            <div class="d-flex align-items-center">
-                <a href="/history" class="btn btn-sm btn-light text-purple fw-semibold me-2" style="color: #6b21a8;">
-                    <i class="fa-solid fa-database text-purple me-1"></i> Historial en PostgreSQL
+            <div class="d-flex align-items-center gap-2">
+                <a href="/history" class="btn btn-sm btn-light fw-bold" style="color: #4c1d95;">
+                    <i class="fa-solid fa-database me-1 text-primary"></i> Base de Datos PostgreSQL
                 </a>
                 <span class="badge bg-white text-dark py-2 px-3 rounded-pill fw-semibold shadow-sm">
-                    <i class="fa-solid fa-laptop-code text-primary me-1"></i> Ing. en Software
+                    <i class="fa-solid fa-laptop-code text-primary me-1"></i> Ing. de Software
                 </span>
             </div>
         </div>
@@ -159,98 +189,63 @@
 
     <div class="container-fluid px-4">
 
-        <!-- ========================================== -->
-        <!-- SECCIÓN 1: CONTEXTO, PROBLEMA Y EXPLICACIÓN -->
-        <!-- ========================================== -->
+        <!-- ======================================================== -->
+        <!-- SECCIÓN 1: CONTEXTO REAL DE LA PAZ Y PREGUNTA CLAVE     -->
+        <!-- ======================================================== -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card card-custom p-4">
+                <div class="hero-banner shadow-sm">
                     <div class="d-md-flex justify-content-between align-items-center mb-3">
                         <div>
-                            <span class="badge badge-lila mb-2 px-3 py-1">
-                                <i class="fa-solid fa-mountain-sun me-1"></i> Contexto Real: La Paz, Bolivia
+                            <span class="badge-lila d-inline-block mb-2">
+                                <i class="fa-solid fa-map-location-dot me-1"></i> Problemática Real en La Paz, Bolivia
                             </span>
-                            <h3 class="section-header mb-1">
-                                Monitoreo y Simulación de Represas contra el Fenómeno de El Niño
-                            </h3>
+                            <h2 class="fw-bold mb-1" style="color: #2e1065;">
+                                Prevención de Crisis Hídrica y Monitoreo de Embalses ante el Fenómeno de El Niño
+                            </h2>
                             <p class="text-muted mb-0">
-                                <strong>Comunidad Beneficiaria:</strong> Población de la Ladera Este, Centro y Zona Sur de la ciudad de La Paz abastecidos por el sistema de represas de <strong>Incachaca</strong> y <strong>Hampaturi</strong>.
+                                <strong>Comunidad Beneficiaria:</strong> Familias, hospitales y colegios de los distritos de la <strong>Ladera Este, Centro y Zona Sur de La Paz</strong>, dependientes del sistema de agua potable de las represas de <strong>Incachaca</strong> y <strong>Hampaturi</strong>.
                             </p>
                         </div>
-                        <div class="mt-3 mt-md-0 d-flex gap-2">
+                        <div class="mt-3 mt-md-0 d-flex flex-wrap gap-2">
                             <button class="btn btn-sm btn-outline-purple" onclick="loadPreset('incachaca')">
-                                <i class="fa-solid fa-faucet-drip me-1"></i> Incachaca (Actual)
+                                <i class="fa-solid fa-faucet-drip me-1"></i> Cargar Represa Incachaca
                             </button>
                             <button class="btn btn-sm btn-outline-purple" onclick="loadPreset('hampaturi')">
-                                <i class="fa-solid fa-water me-1"></i> Hampaturi
+                                <i class="fa-solid fa-water me-1"></i> Cargar Represa Hampaturi
                             </button>
                             <button class="btn btn-sm btn-purple" onclick="loadPreset('nueva_represa')">
-                                <i class="fa-solid fa-plus-circle me-1"></i> Nueva Represa Proyectada
+                                <i class="fa-solid fa-plus-circle me-1"></i> Simular Nueva Represa (El Niño)
                             </button>
                         </div>
                     </div>
 
-                    <!-- Acordeón con Explicación Detallada del Problema y Matemática -->
-                    <div class="accordion" id="accordionContexto">
-                        <div class="accordion-item border-0 mb-2">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
-                                    <i class="fa-solid fa-circle-info text-primary me-2"></i> 
-                                    1. Problema Específico, Relevancia y la Pregunta del Desafío
-                                </button>
-                            </h2>
-                            <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionContexto">
-                                <div class="accordion-body bg-light rounded-bottom p-3">
-                                    <p>
-                                        <strong>Relevancia en La Paz:</strong> En 2016 La Paz vivió la peor crisis hídrica de su historia, dejando sin agua por red a 94 barrios durante meses. En la actualidad, el <strong>Fenómeno de El Niño</strong> atrasa el periodo de lluvias y provoca temperaturas más altas en la cordillera, acelerando el estiaje.
-                                    </p>
-                                    <div class="alert alert-warning border-0 shadow-sm mb-0">
-                                        <i class="fa-solid fa-triangle-exclamation me-1"></i>
-                                        <strong>Pregunta Concreta del Desafío:</strong> 
-                                        <em>"Bajo el consumo diario de los distritos paceños y el escaso caudal cordillerano en estiaje, ¿en cuántos días el volumen de la represa de Incachaca descenderá al 20% de su capacidad ($V_{\text{crítico}} = 1.04\text{ Mm}^3$), obligando a activar racionamiento preventivo en el software municipal para no dejar a la ciudad sin agua?"</em>
-                                    </div>
-                                </div>
+                    <div class="row g-3 mt-1">
+                        <!-- Contexto Histórico y Ambiental -->
+                        <div class="col-lg-7">
+                            <div class="card card-custom p-3 h-100 bg-white">
+                                <h6 class="fw-bold text-purple mb-2">
+                                    <i class="fa-solid fa-cloud-sun-rain text-primary me-2"></i>Contexto Hídrico de La Paz:
+                                </h6>
+                                <p class="small text-muted mb-2 text-justify" style="line-height: 1.6;">
+                                    En noviembre de 2016, la ciudad de La Paz sufrió la sequía más severa de su historia reciente, cuando los embalses de Incachaca y Hampaturi se vaciaron casi por completo, dejando a <strong>94 barrios paceños sin suministro de agua continuo</strong> durante meses. 
+                                </p>
+                                <p class="small text-muted mb-0 text-justify" style="line-height: 1.6;">
+                                    Hoy, el <strong>Fenómeno de El Niño</strong> agrava el periodo seco (estiaje de agosto a diciembre) retrasando la temporada de lluvias andinas y aumentando la radiación solar en el altiplano. Como solución, el gobierno municipal y nacional impulsan nuevas represas y la digitalización de la telemetría para anticipar el vaciado de los embalses.
+                                </p>
                             </div>
                         </div>
 
-                        <div class="accordion-item border-0">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
-                                    <i class="fa-solid fa-square-root-variable text-primary me-2"></i> 
-                                    2. Deducción Matemática Paso a Paso, Solución Analítica y Comprobación
-                                </button>
-                            </h2>
-                            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionContexto">
-                                <div class="accordion-body bg-light rounded-bottom p-3">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <h6 class="fw-bold text-purple"><i class="fa-solid fa-pen-nib me-1"></i> Formulación de la EDO:</h6>
-                                            <p class="small text-muted mb-2">Por principio de conservación de masa (balance de volumen):</p>
-                                            <div class="math-box mb-2">
-                                                $$\frac{dV}{dt} = Q_{\text{in}} - k \cdot V, \quad V(0) = V_0$$
-                                            </div>
-                                            <ul class="small mb-0 text-muted">
-                                                <li>$V(t)$: Volumen útil de agua ($\text{Mm}^3$, millones de metros cúbicos).</li>
-                                                <li>$t$: Tiempo transcurrido en días de estiaje.</li>
-                                                <li>$Q_{\text{in}}$: Aporte constante de ríos afluentes y deshielo ($\text{Mm}^3/\text{día}$).</li>
-                                                <li>$k$: Coeficiente de consumo por red y evaporación ($\text{día}^{-1}$).</li>
-                                            </ul>
-                                        </div>
-
-                                        <div class="col-md-6 mb-3">
-                                            <h6 class="fw-bold text-purple"><i class="fa-solid fa-calculator me-1"></i> Solución Analítica Exacta:</h6>
-                                            <p class="small text-muted mb-2">Reordenando como EDO lineal de primer orden:</p>
-                                            <div class="math-box mb-2">
-                                                $$\frac{dV}{dt} + k V = Q_{\text{in}}$$
-                                                $$V(t) = \frac{Q_{\text{in}}}{k} + \left(V_0 - \frac{Q_{\text{in}}}{k}\right) e^{-kt}$$
-                                            </div>
-                                            <div class="small text-muted">
-                                                <strong>Comprobación por sustitución:</strong> 
-                                                Derivando $V'(t) = -k\left(V_0 - \frac{Q_{\text{in}}}{k}\right)e^{-kt}$. 
-                                                Al sumar $V'(t) + kV(t) = Q_{\text{in}}$, se comprueba que la ecuación se satisface idénticamente en todo $t$, con $V(0) = V_0$.
-                                            </div>
-                                        </div>
-                                    </div>
+                        <!-- Pregunta Concreta del Desafío -->
+                        <div class="col-lg-5">
+                            <div class="card card-custom p-3 h-100" style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); border-color: #c4b5fd;">
+                                <h6 class="fw-bold text-purple mb-2">
+                                    <i class="fa-solid fa-circle-question text-danger me-2"></i>Pregunta Concreta del Desafío:
+                                </h6>
+                                <div class="p-3 bg-white rounded-3 border border-purple shadow-sm">
+                                    <p class="fst-italic fw-semibold mb-0" style="font-size: 0.95rem; color: #4c1d95; line-height: 1.5;">
+                                        "¿En cuántos días exactos de estiaje continuo el volumen de la represa de Incachaca descenderá al 20% de su capacidad ($V_{\text{crítico}} = 1.04\text{ Mm}^3$), obligando a activar racionamiento preventivo por distritos en el software municipal para evitar un corte total de agua potable?"
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -259,19 +254,130 @@
             </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- SECCIÓN 2: SIMULADOR INTERACTIVO Y GRÁFICO -->
-        <!-- ========================================== -->
+        <!-- ======================================================== -->
+        <!-- SECCIÓN 2: FORMULACIÓN MATEMÁTICA Y SIGNIFICADO VARIABLES-->
+        <!-- ======================================================== -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card card-custom p-4">
+                    <h4 class="fw-bold mb-3" style="color: #3b0764;">
+                        <i class="fa-solid fa-square-root-variable text-primary me-2"></i>Fundamento Matemático y Significado de Variables
+                    </h4>
+
+                    <div class="row g-4">
+                        <!-- EDO y Solución Analítica -->
+                        <div class="col-lg-6">
+                            <div class="math-display-box h-100">
+                                <h6 class="fw-bold text-purple mb-1">
+                                    <i class="fa-solid fa-pen-ruler me-2"></i>1. Ecuación Diferencial Ordinaria (EDO de 1.er Orden)
+                                </h6>
+                                <p class="small text-muted mb-2">
+                                    Basada en el principio físico de <strong>conservación de masa</strong> (balance hídrico continuo):
+                                </p>
+                                
+                                <div class="math-formula">
+                                    $$\frac{dV}{dt} = Q_{\text{in}} - k \cdot V, \quad \text{con Condición Inicial: } V(0) = V_0$$
+                                </div>
+
+                                <h6 class="fw-bold text-purple mt-3 mb-1">
+                                    <i class="fa-solid fa-check-double me-2"></i>2. Solución Analítica Exacta (por Factor Integrante)
+                                </h6>
+                                <p class="small text-muted mb-2">
+                                    Reescribiendo como EDO lineal $\frac{dV}{dt} + k V = Q_{\text{in}}$ con factor integrante $\mu(t) = e^{kt}$:
+                                </p>
+
+                                <div class="math-formula">
+                                    $$V(t) = \frac{Q_{\text{in}}}{k} + \left(V_0 - \frac{Q_{\text{in}}}{k}\right) e^{-kt}$$
+                                </div>
+
+                                <div class="alert alert-light border border-purple p-2 mt-2 mb-0 small text-muted">
+                                    <strong>Comprobación por Sustitución:</strong> Derivando $V'(t) = -k\left(V_0 - \frac{Q_{\text{in}}}{k}\right)e^{-kt}$. Al sustituir en el lado izquierdo: $V'(t) + k V(t) = Q_{\text{in}}$, satisfaciendo la igualdad idénticamente para todo $t \ge 0$.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabla con Significado de Todas las Variables -->
+                        <div class="col-lg-6">
+                            <div class="card card-custom p-3 h-100 bg-white">
+                                <h6 class="fw-bold text-purple mb-2">
+                                    <i class="fa-solid fa-list-check me-2 text-primary"></i>Glosario y Significado Físico de las Variables
+                                </h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover table-variables small align-middle mb-0">
+                                        <thead class="table-dark-purple">
+                                            <tr>
+                                                <th style="width: 15%;">Símbolo</th>
+                                                <th style="width: 30%;">Variable / Parámetro</th>
+                                                <th style="width: 15%;">Unidad</th>
+                                                <th style="width: 40%;">Significado en La Paz</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="fw-bold text-primary fs-6">$V(t)$</td>
+                                                <td>Volumen Útil Almacenado</td>
+                                                <td>$\text{Mm}^3$</td>
+                                                <td>Cantidad de agua potable disponible en el embalse.</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-primary fs-6">$t$</td>
+                                                <td>Tiempo Transcurrido</td>
+                                                <td>$\text{días}$</td>
+                                                <td>Días de estiaje continuo sin lluvias cordilleranas.</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-primary fs-6">$V_0$</td>
+                                                <td>Volumen Inicial</td>
+                                                <td>$\text{Mm}^3$</td>
+                                                <td>Nivel de la represa al comenzar la época seca ($V(0)$).</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-primary fs-6">$Q_{\text{in}}$</td>
+                                                <td>Caudal de Aporte</td>
+                                                <td>$\text{Mm}^3/\text{día}$</td>
+                                                <td>Agua ingresada por afluentes y deshielo andino.</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-primary fs-6">$k$</td>
+                                                <td>Tasa de Extracción</td>
+                                                <td>$\text{día}^{-1}$</td>
+                                                <td>Extracción para la planta potabilizadora + evaporación.</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-danger fs-6">$V_{\text{crítico}}$</td>
+                                                <td>Cota de Alerta Roja</td>
+                                                <td>$\text{Mm}^3$</td>
+                                                <td>Nivel de reserva mínima de seguridad ($20\%$ de capacidad).</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-primary fs-6">$h$</td>
+                                                <td>Tamaño de Paso</td>
+                                                <td>$\text{días}$</td>
+                                                <td>Intervalo de muestreo temporal para Heun y RK4.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- SECCIÓN 3: SIMULADOR, GRÁFICAS ESPECÍFICAS Y RESULTADOS  -->
+        <!-- ======================================================== -->
         <div class="row">
-            <!-- Formulario de Parámetros -->
+            <!-- Formulario de Control de Parámetros -->
             <div class="col-lg-4 mb-4">
                 <div class="card card-custom p-4">
                     <h5 class="fw-bold mb-3 border-bottom pb-2 text-purple">
-                        <i class="fa-solid fa-sliders me-2 text-primary"></i>Variables de la EDO
+                        <i class="fa-solid fa-sliders me-2 text-primary"></i>Panel de Simulación de la EDO
                     </h5>
                     <form id="simForm">
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold">Nombre del Escenario</label>
+                            <label class="form-label small fw-semibold">Nombre de la Simulación</label>
                             <input type="text" class="form-control form-control-sm" id="simTitle" value="Incachaca - Sequía El Niño 2026">
                         </div>
                         <div class="mb-3">
@@ -285,18 +391,14 @@
 
                         <div class="row g-2 mb-2">
                             <div class="col-6">
-                                <label class="form-label small fw-semibold">
-                                    Volumen Inicial $V_0$
-                                </label>
+                                <label class="form-label small fw-semibold">Volumen $V_0$</label>
                                 <div class="input-group input-group-sm">
                                     <input type="number" step="0.01" class="form-control" id="inputV0" value="4.50" required>
                                     <span class="input-group-text">Mm³</span>
                                 </div>
                             </div>
                             <div class="col-6">
-                                <label class="form-label small fw-semibold">
-                                    Aporte $Q_{\text{in}}$
-                                </label>
+                                <label class="form-label small fw-semibold">Aporte $Q_{\text{in}}$</label>
                                 <div class="input-group input-group-sm">
                                     <input type="number" step="0.005" class="form-control" id="inputQin" value="0.020" required>
                                     <span class="input-group-text">Mm³/d</span>
@@ -306,18 +408,14 @@
 
                         <div class="row g-2 mb-2">
                             <div class="col-6">
-                                <label class="form-label small fw-semibold">
-                                    Tasa $k$ (Consumo)
-                                </label>
+                                <label class="form-label small fw-semibold">Tasa $k$ (Consumo)</label>
                                 <div class="input-group input-group-sm">
                                     <input type="number" step="0.001" class="form-control" id="inputK" value="0.035" required>
                                     <span class="input-group-text">d⁻¹</span>
                                 </div>
                             </div>
                             <div class="col-6">
-                                <label class="form-label small fw-semibold">
-                                    Alerta Roja $V_{\text{crit}}$
-                                </label>
+                                <label class="form-label small fw-semibold">Alerta $V_{\text{crítico}}$</label>
                                 <div class="input-group input-group-sm">
                                     <input type="number" step="0.01" class="form-control" id="inputVcrit" value="1.04" required>
                                     <span class="input-group-text">Mm³</span>
@@ -331,47 +429,47 @@
                                 <input type="number" class="form-control form-control-sm" id="inputTmax" value="60" required>
                             </div>
                             <div class="col-4">
-                                <label class="form-label small fw-semibold" title="Paso principal">Paso $h_1$</label>
+                                <label class="form-label small fw-semibold" title="Paso 1 principal">Paso $h_1$</label>
                                 <input type="number" step="0.1" class="form-control form-control-sm" id="inputH1" value="1.0" required>
                             </div>
                             <div class="col-4">
-                                <label class="form-label small fw-semibold" title="Paso fino para comparar">Paso $h_2$</label>
+                                <label class="form-label small fw-semibold" title="Paso 2 comparativo">Paso $h_2$</label>
                                 <input type="number" step="0.1" class="form-control form-control-sm" id="inputH2" value="0.5" required>
                             </div>
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-purple fw-semibold py-2">
-                                <i class="fa-solid fa-play me-1"></i> Simular (Heun vs RK4)
+                            <button type="submit" class="btn btn-purple py-2">
+                                <i class="fa-solid fa-play me-1"></i> Ejecutar Simulación Numérica
                             </button>
-                            <button type="button" class="btn btn-outline-purple fw-semibold py-2" onclick="saveToDatabase()">
-                                <i class="fa-solid fa-cloud-arrow-up me-1"></i> Guardar en Base de Datos PostgreSQL
+                            <button type="button" class="btn btn-outline-purple py-2" onclick="saveToDatabase()">
+                                <i class="fa-solid fa-floppy-disk me-1"></i> Guardar en Base de Datos PostgreSQL
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- Gráfico y Métricas -->
+            <!-- Gráficas y Métricas -->
             <div class="col-lg-8 mb-4">
-                <!-- Métricas Clave -->
+                <!-- Tarjetas KPI -->
                 <div class="row g-3 mb-3">
                     <div class="col-md-4">
-                        <div class="card card-custom p-3 text-center border-start border-4 border-danger">
+                        <div class="kpi-card text-center border-start border-4 border-danger">
                             <div class="kpi-title">Alerta Roja de Racionamiento</div>
                             <div class="kpi-value text-danger" id="kpiCriticalDays">--</div>
-                            <small class="text-muted">Día proyectado al $20\%$</small>
+                            <small class="text-muted">Día de cruce al $20\%$ crítico</small>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="card card-custom p-3 text-center border-start border-4 border-success">
+                        <div class="kpi-card text-center border-start border-4 border-success">
                             <div class="kpi-title">Error Máximo RK4 ($h_1$)</div>
                             <div class="kpi-value text-success" id="kpiErrorRK4">--</div>
-                            <small class="text-muted">Runge-Kutta 4.º orden ($O(h^4)$)</small>
+                            <small class="text-muted">Runge-Kutta 4 ($O(h^4)$)</small>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="card card-custom p-3 text-center border-start border-4 border-warning">
+                        <div class="kpi-card text-center border-start border-4 border-warning">
                             <div class="kpi-title">Error Máximo Heun ($h_1$)</div>
                             <div class="kpi-value text-warning" id="kpiErrorHeun">--</div>
                             <small class="text-muted">Método Heun ($O(h^2)$)</small>
@@ -379,49 +477,63 @@
                     </div>
                 </div>
 
-                <!-- Gráfico de Curvas Elegantes en Tonos Morado y Lila -->
-                <div class="card card-custom p-3 mb-3">
+                <!-- Gráfica Específica con Pestañas -->
+                <div class="card card-custom p-4 mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="fw-bold mb-0 text-purple">
-                            <i class="fa-solid fa-chart-line text-primary me-2"></i>Evolución del Volumen Útil del Embalse
+                            <i class="fa-solid fa-chart-line text-primary me-2"></i>Curvas Específicas de Simulación
                         </h6>
-                        <span class="badge badge-lila" id="badgeStepComparison">Comparando $h_1$ y $h_2$</span>
+                        <ul class="nav nav-pills nav-pills-sm" id="chartTabs">
+                            <li class="nav-item">
+                                <button class="nav-link active py-1 px-3" onclick="switchChartMode('volume')">Curva de Volumen $V(t)$</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link py-1 px-3" onclick="switchChartMode('error')">Comparación de Errores (%)</button>
+                            </li>
+                        </ul>
                     </div>
-                    <div style="position: relative; height: 330px;">
+
+                    <div class="chart-container-box">
                         <canvas id="reservoirChart"></canvas>
+                    </div>
+
+                    <div class="small text-muted text-center mt-2" id="chartExplanationText">
+                        Visualizando la evolución del volumen embalsado frente a la cota crítica de racionamiento.
                     </div>
                 </div>
 
-                <!-- Interpretación Comunitaria -->
-                <div class="card card-custom p-3 border-start border-4" style="border-left-color: #8b5cf6 !important; background-color: #faf5ff;">
-                    <div class="d-flex align-items-center mb-1">
-                        <i class="fa-solid fa-bullhorn text-purple fs-5 me-2"></i>
-                        <h6 class="fw-bold text-purple mb-0">Respuesta al Desafío y Conclusión para La Paz:</h6>
-                    </div>
-                    <p class="mb-0 text-dark small" id="txtInterpretation" style="line-height: 1.6;">
-                        Ejecute la simulación para generar el reporte de recomendación para EPSAS.
+                <!-- EXPLICACIÓN DETALLADA DE RESULTADOS -->
+                <div class="card card-custom p-3 border-start border-4" style="border-left-color: #7c3aed !important; background: #faf5ff;">
+                    <h6 class="fw-bold text-purple mb-2">
+                        <i class="fa-solid fa-bullhorn text-primary me-2"></i>Explicación Detallada de los Resultados para la Comunidad:
+                    </h6>
+                    <p class="mb-0 small text-dark" id="txtInterpretation" style="line-height: 1.7;">
+                        Ejecute la simulación para generar el reporte explicativo para la Alcaldía y EPSAS.
                     </p>
                 </div>
             </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- SECCIÓN 3: TABLA COMPARATIVA ITERATIVA -->
-        <!-- ========================================== -->
+        <!-- ======================================================== -->
+        <!-- SECCIÓN 4: TABLA ITERATIVA DETALLADA                     -->
+        <!-- ======================================================== -->
         <div class="row mb-5">
             <div class="col-12">
                 <div class="card card-custom p-4">
                     <div class="d-md-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold text-purple mb-0">
-                            <i class="fa-solid fa-table-list text-primary me-2"></i>Tabla Comparativa Paso a Paso ($h_1 = 1.0\text{ día}$)
-                        </h5>
-                        <div id="stepSummaryText" class="small mt-2 mt-md-0">
-                            <!-- Inyectado por JS -->
+                        <div>
+                            <h5 class="fw-bold text-purple mb-0">
+                                <i class="fa-solid fa-table text-primary me-2"></i>Tabla Comparativa Iterativa por Pasos ($h_1 = 1.0\text{ día}$)
+                            </h5>
+                            <small class="text-muted">Cálculo de error absoluto $|V_{\text{exacta}} - V_{\text{numérica}}|$ y error relativo porcentual.</small>
+                        </div>
+                        <div id="stepSummaryText" class="mt-2 mt-md-0">
+                            <!-- Inyectado dinámicamente -->
                         </div>
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table table-sm table-hover table-striped align-middle text-center" style="font-size: 0.86rem;">
+                        <table class="table table-sm table-hover table-striped align-middle text-center small mb-0">
                             <thead class="table-dark-purple">
                                 <tr>
                                     <th>Paso</th>
@@ -437,7 +549,7 @@
                             </thead>
                             <tbody id="tableBody">
                                 <tr>
-                                    <td colspan="9" class="text-muted py-4">Haga clic en "Simular" para generar la tabla.</td>
+                                    <td colspan="9" class="text-muted py-4">Presione "Ejecutar Simulación Numérica" para generar los datos.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -460,11 +572,12 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Scripts de Bootstrap y Funcionalidad -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let myChart = null;
         let lastSimulationData = null;
+        let currentChartMode = 'volume'; // 'volume' o 'error'
 
         function renderMath() {
             if (window.renderMathInElement) {
@@ -526,7 +639,7 @@
                 });
                 const data = await response.json();
                 if (!data.success) {
-                    alert("Error: " + data.error);
+                    alert("Error en simulación: " + data.error);
                     return;
                 }
 
@@ -538,19 +651,31 @@
         }
 
         function renderResults(data) {
-            document.getElementById('kpiCriticalDays').innerText = data.critical_day > 0 ? `${data.critical_day} días` : (data.critical_day === -1 ? 'Seguro' : 'Crítico');
+            // Actualizar KPIs
+            document.getElementById('kpiCriticalDays').innerText = data.critical_day > 0 ? `${data.critical_day} días` : (data.critical_day === -1 ? 'Sin Riesgo' : 'Crítico');
             document.getElementById('kpiErrorRK4').innerText = `${data.max_err_rk4.toExponential(3)} %`;
             document.getElementById('kpiErrorHeun').innerText = `${data.max_err_heun.toFixed(4)} %`;
-            document.getElementById('txtInterpretation').innerText = data.interpretation;
+            
+            // Explicación Detallada y Contextualizada
+            const critText = data.critical_day > 0 
+                ? `El modelo predice que la represa descenderá a su cota crítica del 20% (${data.table[0].V_crit || 1.04} Mm³) en exactamente <strong>${data.critical_day} días</strong>. Por consiguiente, EPSAS y el municipio disponen de una ventana de acción preventiva de <strong>${Math.floor(data.critical_day - 7)} días</strong> para activar pozos subterráneos e implementar racionamiento programado por turnos antes de que ocurra un corte imprevisto. Desde el punto de vista numérico, <strong>Runge-Kutta 4 (RK4)</strong> produjo un error máximo de apenas ${data.max_err_rk4.toExponential(2)}%, siendo exponencialmente más exacto que Heun (${data.max_err_heun.toFixed(4)}%).`
+                : (data.critical_day === -1 
+                    ? `El caudal de afluentes y deshielo ($Q_{\\text{in}} = ${document.getElementById('inputQin').value}\\text{ Mm}^3/\\text{d}$) es suficiente para estabilizar la represa por encima de la cota crítica. No hay riesgo de desabastecimiento bajo este régimen.` 
+                    : `La represa ya se encuentra por debajo de la reserva mínima de seguridad.`);
 
+            document.getElementById('txtInterpretation').innerHTML = critText;
+
+            // Comparativa de Pasos h1 vs h2
             const comp = data.step_comparison;
             document.getElementById('stepSummaryText').innerHTML = `
                 <span class="badge badge-lila me-2">Paso $h_1=${comp.h1.valor}\\text{ d}$: Err RK4: ${comp.h1.max_err_rk4.toExponential(2)}% | Err Heun: ${comp.h1.max_err_heun.toFixed(4)}%</span>
                 <span class="badge bg-light text-dark border">Paso $h_2=${comp.h2.valor}\\text{ d}$: Err RK4: ${comp.h2.max_err_rk4.toExponential(2)}% | Err Heun: ${comp.h2.max_err_heun.toFixed(4)}%</span>
             `;
 
-            renderChart(data);
+            // Renderizar Gráfica
+            drawChart();
 
+            // Llenar Tabla
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             data.table.forEach(row => {
@@ -569,107 +694,150 @@
                 tbody.appendChild(tr);
             });
 
-            // Re-renderizar fórmulas KaTeX en los nuevos elementos
             renderMath();
         }
 
-        function renderChart(data) {
-            const ctx = document.getElementById('reservoirChart').getContext('2d');
-            if (myChart) {
-                myChart.destroy();
+        function switchChartMode(mode) {
+            currentChartMode = mode;
+            const tabs = document.querySelectorAll('#chartTabs .nav-link');
+            tabs.forEach(t => t.classList.remove('active'));
+            if (mode === 'volume') {
+                tabs[0].classList.add('active');
+                document.getElementById('chartExplanationText').innerText = "Visualizando la evolución del volumen embalsado frente a la cota crítica de racionamiento.";
+            } else {
+                tabs[1].classList.add('active');
+                document.getElementById('chartExplanationText').innerText = "Comparación directa del error relativo (%) entre Heun (RK2) y RK4 a lo largo del tiempo.";
             }
+            drawChart();
+        }
 
-            // Gradiente Lila/Morado Suave para la curva Analítica
-            const gradientPurple = ctx.createLinearGradient(0, 0, 0, 300);
-            gradientPurple.addColorStop(0, 'rgba(139, 92, 246, 0.35)');
-            gradientPurple.addColorStop(1, 'rgba(237, 233, 254, 0.05)');
+        function drawChart() {
+            if (!lastSimulationData) return;
+            const ctx = document.getElementById('reservoirChart').getContext('2d');
+            if (myChart) myChart.destroy();
 
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.t_h1.map(t => `${t} d`),
-                    datasets: [
-                        {
-                            label: 'Solución Analítica (Exacta)',
-                            data: data.v_exact,
-                            borderColor: '#7c3aed',
-                            backgroundColor: gradientPurple,
-                            borderWidth: 3.5,
-                            fill: true,
-                            tension: 0.3,
-                            pointRadius: 0,
-                            pointHoverRadius: 6
-                        },
-                        {
-                            label: 'Runge-Kutta 4.º Orden (RK4)',
-                            data: data.v_rk4,
-                            borderColor: '#10b981',
-                            borderWidth: 2,
-                            borderDash: [5, 4],
-                            pointRadius: 2.5,
-                            pointBackgroundColor: '#10b981',
-                            fill: false,
-                            tension: 0.3
-                        },
-                        {
-                            label: 'Método de Heun (RK2)',
-                            data: data.v_heun,
-                            borderColor: '#f59e0b',
-                            borderWidth: 2,
-                            borderDash: [3, 3],
-                            pointRadius: 2,
-                            pointBackgroundColor: '#f59e0b',
-                            fill: false,
-                            tension: 0.3
-                        },
-                        {
-                            label: 'Umbral Alerta Roja (20%)',
-                            data: data.v_crit_line,
-                            borderColor: '#ef4444',
-                            borderWidth: 2.2,
-                            borderDash: [8, 4],
-                            pointRadius: 0,
-                            fill: false
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: { 
-                            position: 'top',
-                            labels: {
-                                font: { weight: '600', size: 12 },
-                                usePointStyle: true
+            if (currentChartMode === 'volume') {
+                const gradientPurple = ctx.createLinearGradient(0, 0, 0, 320);
+                gradientPurple.addColorStop(0, 'rgba(124, 58, 237, 0.35)');
+                gradientPurple.addColorStop(1, 'rgba(237, 233, 254, 0.05)');
+
+                myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: lastSimulationData.t_h1.map(t => `${t} d`),
+                        datasets: [
+                            {
+                                label: 'Solución Analítica Exacta V(t)',
+                                data: lastSimulationData.v_exact,
+                                borderColor: '#7c3aed',
+                                backgroundColor: gradientPurple,
+                                borderWidth: 3.5,
+                                fill: true,
+                                tension: 0.3,
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'Runge-Kutta 4.º Orden (RK4)',
+                                data: lastSimulationData.v_rk4,
+                                borderColor: '#10b981',
+                                borderWidth: 2,
+                                borderDash: [4, 4],
+                                pointRadius: 2.5,
+                                fill: false,
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Método de Heun (RK2)',
+                                data: lastSimulationData.v_heun,
+                                borderColor: '#f59e0b',
+                                borderWidth: 2,
+                                borderDash: [3, 3],
+                                pointRadius: 2,
+                                fill: false,
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Alerta Roja: Racionamiento (20%)',
+                                data: lastSimulationData.v_crit_line,
+                                borderColor: '#ef4444',
+                                borderWidth: 2.5,
+                                borderDash: [8, 4],
+                                pointRadius: 0,
+                                fill: false
                             }
-                        },
-                        tooltip: {
-                            backgroundColor: '#2e1065',
-                            titleFont: { weight: 'bold' },
-                            padding: 10,
-                            cornerRadius: 8,
-                            callbacks: {
-                                label: function(ctx) {
-                                    return ` ${ctx.dataset.label}: ${ctx.parsed.y} Mm³`;
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { position: 'top', labels: { font: { weight: '600' }, usePointStyle: true } },
+                            tooltip: {
+                                backgroundColor: '#2e1065',
+                                padding: 10,
+                                cornerRadius: 8,
+                                callbacks: {
+                                    label: function(c) { return ` ${c.dataset.label}: ${c.parsed.y} Mm³`; }
                                 }
                             }
-                        }
-                    },
-                    scales: {
-                        x: { 
-                            title: { display: true, text: 'Tiempo transcurrido en época de estiaje (días)', font: { weight: '600' } },
-                            grid: { color: 'rgba(221, 214, 254, 0.4)' }
                         },
-                        y: { 
-                            title: { display: true, text: 'Volumen útil almacenado (Mm³)', font: { weight: '600' } },
-                            grid: { color: 'rgba(221, 214, 254, 0.4)' },
-                            beginAtZero: false 
+                        scales: {
+                            x: { title: { display: true, text: 'Días transcurridos en época seca (La Paz)', font: { weight: '600' } } },
+                            y: { title: { display: true, text: 'Volumen útil embalsado (Mm³)', font: { weight: '600' } } }
                         }
                     }
-                }
-            });
+                });
+            } else {
+                // Modo Gráfica de Errores
+                const errHeun = lastSimulationData.table.map(r => r.err_rel_heun);
+                const errRK4 = lastSimulationData.table.map(r => r.err_rel_rk4);
+
+                myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: lastSimulationData.t_h1.map(t => `${t} d`),
+                        datasets: [
+                            {
+                                label: 'Error Relativo % Heun (RK2)',
+                                data: errHeun,
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                borderWidth: 2.5,
+                                fill: true,
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Error Relativo % RK4',
+                                data: errRK4,
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                borderWidth: 2.5,
+                                fill: true,
+                                tension: 0.3
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { position: 'top', labels: { font: { weight: '600' } } },
+                            tooltip: {
+                                backgroundColor: '#2e1065',
+                                callbacks: {
+                                    label: function(c) { return ` ${c.dataset.label}: ${c.parsed.y}%`; }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { title: { display: true, text: 'Días transcurridos', font: { weight: '600' } } },
+                            y: { title: { display: true, text: 'Error Relativo Porcentual (%)', font: { weight: '600' } } }
+                        }
+                    }
+                });
+            }
         }
 
         async function saveToDatabase() {
@@ -681,7 +849,7 @@
             const payload = {
                 title: document.getElementById('simTitle').value,
                 represa_name: document.getElementById('represaName').value,
-                description: "Simulación de telemetría de embalses en La Paz ante el Fenómeno de El Niño.",
+                description: "Telemetría predictiva de embalses en La Paz ante el Fenómeno de El Niño.",
                 V0: lastSimulationData.V0,
                 Qin: lastSimulationData.Qin,
                 k: lastSimulationData.k,
@@ -692,7 +860,7 @@
                 critical_day: lastSimulationData.critical_day,
                 max_err_heun: lastSimulationData.max_err_heun,
                 max_err_rk4: lastSimulationData.max_err_rk4,
-                interpretation: lastSimulationData.interpretation
+                interpretation: document.getElementById('txtInterpretation').innerText
             };
 
             try {
