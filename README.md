@@ -1,6 +1,6 @@
 #  Modelado Predictivo de Represas en La Paz frente al Fenómeno de El Niño
 ### Métodos Numéricos | Desafío Individual: Ecuaciones Diferenciales Ordinarias (EDO)
-**Autor:** [Tu Nombre Completo]  
+**Autor:** MARIAL GABRIELA RODAS CHAMBI   
 **Materia:** Métodos Numéricos  
 **Carrera / Mención:** Ingeniería en Desarrollo de Software e Innovación Tecnológica  
 **Sede:** La Paz, Bolivia — 2026  
