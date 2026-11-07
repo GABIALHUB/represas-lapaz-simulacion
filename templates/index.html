@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Represas La Paz | Métodos Numéricos</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bs-primary: #0d6efd;
+            --bs-dark-blue: #0b2545;
+            --bs-accent: #134074;
+            --bs-bg-soft: #f4f7f6;
+        }
+        body {
+            background-color: var(--bs-bg-soft);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        .navbar-custom {
+            background: linear-gradient(135deg, #0b2545 0%, #134074 100%);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .badge-status {
+            font-size: 0.95rem;
+            padding: 8px 14px;
+            border-radius: 20px;
+        }
+        .math-box {
+            background-color: #eef4f8;
+            border-left: 4px solid #0d6efd;
+            padding: 12px 18px;
+            border-radius: 4px;
+        }
+        .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .kpi-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #6c757d;
+        }
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra de Navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom mb-4">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fa-solid fa-water me-2"></i> EPSAS Telemetría · Represas La Paz
+            </a>
+            <div class="d-flex align-items-center">
+                <a href="/history" class="btn btn-outline-light btn-sm me-2">
+                    <i class="fa-solid fa-database me-1"></i> Base de Datos (PostgreSQL)
+                </a>
+                <span class="badge bg-light text-dark">
+                    <i class="fa-solid fa-shield-halved text-primary me-1"></i> EDO 1.° Orden
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4">
+        <!-- Encabezado del Desafío Comunitario -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card card-custom p-3 bg-white">
+                    <div class="d-md-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="fw-bold mb-1 text-primary">
+                                <i class="fa-solid fa-chart-line me-2"></i>Monitoreo Predictivo de Represas contra la Sequía y El Niño
+                            </h4>
+                            <p class="text-muted mb-0">
+                                <strong>Población Beneficiaria:</strong> Familias de la Ladera Este, Centro y Zona Sur de La Paz dependientes del sistema Incachaca / Pampahasi.
+                            </p>
+                        </div>
+                        <div class="mt-2 mt-md-0">
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="loadPreset('incachaca')">
+                                <i class="fa-solid fa-mountain me-1"></i> Incachaca (Actual)
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary me-1" onclick="loadPreset('hampaturi')">
+                                <i class="fa-solid fa-water me-1"></i> Hampaturi
+                            </button>
+                            <button class="btn btn-sm btn-outline-success" onclick="loadPreset('nueva_represa')">
+                                <i class="fa-solid fa-plus-circle me-1"></i> Nueva Represa (Proyectada)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Cuadro del Modelo Matemático -->
+                    <div class="math-box mt-3 small">
+                        <strong>Modelo Matemático (EDO de 1.er orden):</strong> 
+                        $\frac{dV}{dt} = Q_{\text{in}} - k \cdot V$ &nbsp;|&nbsp; 
+                        <strong>Condición Inicial:</strong> $V(0) = V_0$ &nbsp;|&nbsp;
+                        <strong>Solución Analítica Exacta:</strong> 
+                        $V(t) = \frac{Q_{\text{in}}}{k} + \left(V_0 - \frac{Q_{\text{in}}}{k}\right) e^{-kt}$
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Columna Izquierda: Parámetros del Modelo -->
+            <div class="col-lg-4 mb-4">
+                <div class="card card-custom p-4 bg-white">
+                    <h5 class="fw-bold mb-3 border-bottom pb-2">
+                        <i class="fa-solid fa-sliders text-primary me-2"></i>Parámetros del Sistema
+                    </h5>
+                    <form id="simForm">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Nombre de la Simulación</label>
+                            <input type="text" class="form-control form-control-sm" id="simTitle" value="Escenario Estiaje Crítico - La Paz">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Represa Analizada</label>
+                            <select class="form-select form-select-sm" id="represaName">
+                                <option value="Represa de Incachaca">Represa de Incachaca (Cap. 5.2 Mm³)</option>
+                                <option value="Represa de Hampaturi">Represa de Hampaturi (Cap. 3.5 Mm³)</option>
+                                <option value="Nueva Represa Contra Sequías">Nueva Represa Proyectada (El Niño)</option>
+                            </select>
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold" title="Volumen Inicial">
+                                    $V_0$ Inicial (Mm³)
+                                </label>
+                                <input type="number" step="0.01" class="form-control form-control-sm" id="inputV0" value="4.50" required>
+                                <div class="form-text" style="font-size: 0.72rem;">Volumen al inicio del estiaje</div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold" title="Aporte de Afluentes">
+                                    $Q_{\text{in}}$ Aporte (Mm³/día)
+                                </label>
+                                <input type="number" step="0.005" class="form-control form-control-sm" id="inputQin" value="0.020" required>
+                                <div class="form-text" style="font-size: 0.72rem;">Deshielo/ríos cordillera</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold" title="Coeficiente de Pérdidas">
+                                    $k$ Consumo (día⁻¹)
+                                </label>
+                                <input type="number" step="0.001" class="form-control form-control-sm" id="inputK" value="0.035" required>
+                                <div class="form-text" style="font-size: 0.72rem;">Extracción + evaporación</div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold" title="Nivel de Alerta Roja">
+                                    $V_{\text{crítico}}$ Alerta (Mm³)
+                                </label>
+                                <input type="number" step="0.01" class="form-control form-control-sm" id="inputVcrit" value="1.04" required>
+                                <div class="form-text" style="font-size: 0.72rem;">20% capacidad (Rojo)</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-4">
+                                <label class="form-label small fw-semibold">Tiempo $t$ (días)</label>
+                                <input type="number" class="form-control form-control-sm" id="inputTmax" value="60" required>
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label small fw-semibold" title="Paso principal de simulación">Paso $h_1$ (días)</label>
+                                <input type="number" step="0.1" class="form-control form-control-sm" id="inputH1" value="1.0" required>
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label small fw-semibold" title="Paso fino comparativo">Paso $h_2$ (días)</label>
+                                <input type="number" step="0.1" class="form-control form-control-sm" id="inputH2" value="0.5" required>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary fw-semibold">
+                                <i class="fa-solid fa-play me-1"></i> Simular (Heun vs RK4)
+                            </button>
+                            <button type="button" class="btn btn-success fw-semibold" id="btnSaveDB" onclick="saveToDatabase()">
+                                <i class="fa-solid fa-cloud-arrow-up me-1"></i> Guardar Informe en PostgreSQL
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Indicadores y Gráficos -->
+            <div class="col-lg-8 mb-4">
+                <!-- Tarjetas KPI / Métricas Clave -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <div class="card card-custom p-3 bg-white text-center">
+                            <div class="kpi-title">Días para Alerta Roja</div>
+                            <div class="kpi-value text-danger" id="kpiCriticalDays">--</div>
+                            <small class="text-muted">Umbral crítico de racionamiento</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card card-custom p-3 bg-white text-center">
+                            <div class="kpi-title">Error Máx. RK4 ($h_1$)</div>
+                            <div class="kpi-value text-success" id="kpiErrorRK4">--</div>
+                            <small class="text-muted">Runge-Kutta 4.º orden ($O(h^4)$)</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card card-custom p-3 bg-white text-center">
+                            <div class="kpi-title">Error Máx. Heun ($h_1$)</div>
+                            <div class="kpi-value text-warning" id="kpiErrorHeun">--</div>
+                            <small class="text-muted">Heun / RK 2.º orden ($O(h^2)$)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico Comparativo -->
+                <div class="card card-custom p-3 bg-white mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="fa-solid fa-chart-area text-primary me-2"></i>Curvas de Evolución: Analítica vs. Heun vs. RK4
+                        </h6>
+                        <span class="badge bg-secondary" id="badgeSimInfo">Paso $h = 1.0$ día</span>
+                    </div>
+                    <div style="position: relative; height: 320px;">
+                        <canvas id="reservoirChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Interpretación y Conclusión para la Comunidad Paceña -->
+                <div class="card card-custom p-3 bg-white mb-3 border-start border-4 border-info">
+                    <h6 class="fw-bold text-dark mb-1">
+                        <i class="fa-solid fa-bullhorn text-info me-2"></i>Interpretación Comunitaria (Alcaldía / EPSAS):
+                    </h6>
+                    <p class="mb-0 text-secondary" id="txtInterpretation" style="font-size: 0.93rem;">
+                        Ejecute la simulación para generar el reporte interpretativo.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla Iterativa de Métodos Numéricos -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card card-custom p-3 bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fa-solid fa-table-list text-primary me-2"></i>Tabla Comparativa Paso a Paso ($h_1$)
+                        </h5>
+                        <div class="small text-muted" id="comparisonStepSummary">
+                            <!-- Resumen de comparación de tamaños de paso -->
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover table-striped align-middle text-center" style="font-size: 0.85rem;" id="resultsTable">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Paso</th>
+                                    <th>Día $t$</th>
+                                    <th>$V_{\text{Analítica}}$ (Mm³)</th>
+                                    <th>$V_{\text{Heun}}$ (Mm³)</th>
+                                    <th>$E_{\text{abs}}$ Heun</th>
+                                    <th>$E_{\text{rel}}$ Heun (%)</th>
+                                    <th>$V_{\text{RK4}}$ (Mm³)</th>
+                                    <th>$E_{\text{abs}}$ RK4</th>
+                                    <th>$E_{\text{rel}}$ RK4 (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <tr>
+                                    <td colspan="9" class="text-muted py-4">Haga clic en "Simular" para calcular las iteraciones.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast de Notificación -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="saveToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMessage">
+                    ¡Informe guardado en PostgreSQL!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts de Funcionalidad -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let myChart = null;
+        let lastSimulationData = null;
+
+        // Presets de Represas Paceñas
+        function loadPreset(type) {
+            if (type === 'incachaca') {
+                document.getElementById('simTitle').value = "Represa Incachaca - Sequía El Niño";
+                document.getElementById('represaName').value = "Represa de Incachaca";
+                document.getElementById('inputV0').value = 4.50;
+                document.getElementById('inputQin').value = 0.020;
+                document.getElementById('inputK').value = 0.035;
+                document.getElementById('inputVcrit').value = 1.04;
+                document.getElementById('inputTmax').value = 60;
+            } else if (type === 'hampaturi') {
+                document.getElementById('simTitle').value = "Represa Hampaturi - Monitoreo Estiaje";
+                document.getElementById('represaName').value = "Represa de Hampaturi";
+                document.getElementById('inputV0').value = 3.20;
+                document.getElementById('inputQin').value = 0.015;
+                document.getElementById('inputK').value = 0.032;
+                document.getElementById('inputVcrit').value = 0.70;
+                document.getElementById('inputTmax').value = 50;
+            } else if (type === 'nueva_represa') {
+                document.getElementById('simTitle').value = "Nueva Represa Proyectada para La Paz";
+                document.getElementById('represaName').value = "Nueva Represa Contra Sequías";
+                document.getElementById('inputV0').value = 6.00;
+                document.getElementById('inputQin').value = 0.040;
+                document.getElementById('inputK').value = 0.028;
+                document.getElementById('inputVcrit').value = 1.20;
+                document.getElementById('inputTmax').value = 90;
+            }
+            runSimulation();
+        }
+
+        async function runSimulation() {
+            const payload = {
+                V0: parseFloat(document.getElementById('inputV0').value),
+                Qin: parseFloat(document.getElementById('inputQin').value),
+                k: parseFloat(document.getElementById('inputK').value),
+                V_crit: parseFloat(document.getElementById('inputVcrit').value),
+                t_max: parseFloat(document.getElementById('inputTmax').value),
+                h1: parseFloat(document.getElementById('inputH1').value),
+                h2: parseFloat(document.getElementById('inputH2').value)
+            };
+
+            try {
+                const response = await fetch('/api/simulate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                if (!data.success) {
+                    alert("Error en la simulación: " + data.error);
+                    return;
+                }
+
+                lastSimulationData = { ...payload, ...data };
+                renderResults(data);
+            } catch (err) {
+                console.error("Error al conectar con la API:", err);
+            }
+        }
+
+        function renderResults(data) {
+            // Actualizar KPIs
+            document.getElementById('kpiCriticalDays').innerText = data.critical_day > 0 ? `${data.critical_day} días` : (data.critical_day === -1 ? 'Seguro' : 'Crítico');
+            document.getElementById('kpiErrorRK4').innerText = `${data.max_err_rk4.toExponential(3)} %`;
+            document.getElementById('kpiErrorHeun').innerText = `${data.max_err_heun.toFixed(4)} %`;
+            document.getElementById('txtInterpretation').innerText = data.interpretation;
+
+            // Comparativa de pasos h1 vs h2
+            const comp = data.step_comparison;
+            document.getElementById('comparisonStepSummary').innerHTML = `
+                <span class="badge bg-primary me-2">Paso $h_1=${comp.h1.valor}$ &rarr; Err RK4: ${comp.h1.max_err_rk4.toExponential(2)}% | Err Heun: ${comp.h1.max_err_heun.toFixed(4)}%</span>
+                <span class="badge bg-info text-dark">Paso $h_2=${comp.h2.valor}$ &rarr; Err RK4: ${comp.h2.max_err_rk4.toExponential(2)}% | Err Heun: ${comp.h2.max_err_heun.toFixed(4)}%</span>
+            `;
+
+            // Actualizar Gráfico
+            renderChart(data);
+
+            // Actualizar Tabla
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            data.table.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.step}</td>
+                    <td><strong>${row.t}</strong></td>
+                    <td class="text-primary fw-semibold">${row.exact}</td>
+                    <td>${row.heun}</td>
+                    <td><small class="text-muted">${row.err_abs_heun}</small></td>
+                    <td><span class="badge bg-warning text-dark">${row.err_rel_heun}%</span></td>
+                    <td class="text-success fw-semibold">${row.rk4}</td>
+                    <td><small class="text-muted">${row.err_abs_rk4}</small></td>
+                    <td><span class="badge bg-success">${row.err_rel_rk4}%</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderChart(data) {
+            const ctx = document.getElementById('reservoirChart').getContext('2d');
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.t_h1.map(t => `${t} d`),
+                    datasets: [
+                        {
+                            label: 'Solución Analítica (Exacta)',
+                            data: data.v_exact,
+                            borderColor: '#0d6efd',
+                            backgroundColor: 'rgba(13, 110, 253, 0.05)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Runge-Kutta 4.° Orden (RK4)',
+                            data: data.v_rk4,
+                            borderColor: '#198754',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 2,
+                            fill: false
+                        },
+                        {
+                            label: 'Método de Heun (RK2)',
+                            data: data.v_heun,
+                            borderColor: '#ffc107',
+                            borderWidth: 2,
+                            borderDash: [3, 3],
+                            pointRadius: 2,
+                            fill: false
+                        },
+                        {
+                            label: 'Umbral Alerta Roja (20%)',
+                            data: data.v_crit_line,
+                            borderColor: '#dc3545',
+                            borderWidth: 2,
+                            borderDash: [8, 4],
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y} Mm³`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Tiempo transcurrido (días)' } },
+                        y: { title: { display: true, text: 'Volumen útil almacenado (Mm³)' }, beginAtZero: false }
+                    }
+                }
+            });
+        }
+
+        async function saveToDatabase() {
+            if (!lastSimulationData) {
+                alert("Primero ejecute una simulación.");
+                return;
+            }
+
+            const payload = {
+                title: document.getElementById('simTitle').value,
+                represa_name: document.getElementById('represaName').value,
+                description: "Simulación de telemetría de embalses en La Paz ante el Fenómeno de El Niño.",
+                V0: lastSimulationData.V0,
+                Qin: lastSimulationData.Qin,
+                k: lastSimulationData.k,
+                V_crit: lastSimulationData.V_crit,
+                t_max: lastSimulationData.t_max,
+                h1: lastSimulationData.h1,
+                h2: lastSimulationData.h2,
+                critical_day: lastSimulationData.critical_day,
+                max_err_heun: lastSimulationData.max_err_heun,
+                max_err_rk4: lastSimulationData.max_err_rk4,
+                interpretation: lastSimulationData.interpretation
+            };
+
+            try {
+                const response = await fetch('/api/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const res = await response.json();
+                if (res.success) {
+                    const toast = new bootstrap.Toast(document.getElementById('saveToast'));
+                    document.getElementById('toastMessage').innerText = `¡Informe #${res.report_id} guardado con éxito en la Base de Datos PostgreSQL!`;
+                    toast.show();
+                } else {
+                    alert("Error al guardar: " + res.error);
+                }
+            } catch (err) {
+                alert("Error de conexión al guardar en la base de datos.");
+            }
+        }
+
+        // Ejecutar simulación inicial al cargar la página
+        document.getElementById('simForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            runSimulation();
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            runSimulation();
+        });
+    </script>
+</body>
+</html>
