@@ -1,4 +1,4 @@
-# 🌊 Modelado Predictivo de Represas en La Paz frente al Fenómeno de El Niño
+#  Modelado Predictivo de Represas en La Paz frente al Fenómeno de El Niño
 ### Métodos Numéricos | Desafío Individual: Ecuaciones Diferenciales Ordinarias (EDO)
 **Autor:** [Tu Nombre Completo]  
 **Materia:** Métodos Numéricos  
@@ -7,7 +7,7 @@
 
 ---
 
-## 📌 1. Problema y Contexto Comunitario
+##  1. Problema y Contexto Comunitario
 * **Población Beneficiaria:** Familias, colegios, hospitales y centros productivos de la Ladera Este, Centro y Zona Sur de la ciudad de La Paz abastecidos por el sistema de represas de **Incachaca** y **Hampaturi** de EPSAS.
 * **Problema Específico:** En época de estiaje (octubre a diciembre) y ante la recurrencia del **Fenómeno de El Niño**, las precipitaciones disminuyen severamente en la cordillera andina. La evaporación solar y el continuo consumo de agua potable paceño reducen drásticamente el volumen de agua embalsada, arriesgando una crisis de desabastecimiento similar a la vivida en 2016.
 * **Pregunta Concreta del Desafío:**  
@@ -32,7 +32,7 @@ $$\frac{dV}{dt} = Q_{\text{in}} - k \cdot V$$
 
 ---
 
-## ✏️ 3. Solución Analítica Exacta y Verificación
+ 3. Solución Analítica Exacta y Verificación
 
 La ecuación es una EDO lineal de 1.er orden:
 $$\frac{dV}{dt} + k V = Q_{\text{in}}$$
@@ -58,7 +58,7 @@ $$V(t) = \frac{Q_{\text{in}}}{k} + \left(V_0 - \frac{Q_{\text{in}}}{k}\right) e^
 
 ---
 
-## 💻 4. Métodos Numéricos Implementados
+4. Métodos Numéricos Implementados
 
 ### 4.1 Método de Heun (Runge-Kutta de Orden 2)
 * **Predictor (Euler):** $V_{i+1}^{(0)} = V_i + h \cdot f(t_i, V_i)$
@@ -87,7 +87,7 @@ Para la simulación base ($V_0 = 4.50\text{ Mm}^3$, $Q_{\text{in}} = 0.020$, $k 
 
 ---
 
-## 📢 6. Interpretación de Resultados y Respuesta al Desafío
+ 6. Interpretación de Resultados y Respuesta al Desafío
 * Despejando el día de alerta roja:
   $$t_{\text{crítico}} = -\frac{1}{k} \ln\left( \frac{V_{\text{crítico}} - Q_{\text{in}}/k}{V_0 - Q_{\text{in}}/k} \right) \approx 60.75\text{ días}$$
 * **Respuesta para la comunidad de La Paz:** Si el Fenómeno de El Niño retrasa las lluvias 60 días, la represa de Incachaca entrará en zona de racionamiento el día **61**. Por tanto, la Alcaldía y EPSAS disponen de **un margen de 55 días para iniciar campañas de ahorro hídrico y activación de pozos subterráneos** antes de llegar al nivel crítico.
@@ -100,60 +100,3 @@ Para la simulación base ($V_0 = 4.50\text{ Mm}^3$, $Q_{\text{in}} = 0.020$, $k 
 * **Frontend:** HTML5, Bootstrap 5, Chart.js (gráficos dinámicos interactivos)
 * **ORM:** Flask-SQLAlchemy
 
----
-
-## 🚀 8. Instrucciones de Ejecución Local
-
-1. **Clonar el repositorio:**
-   ```bash
-   git clone https://github.com/TU_USUARIO/represas-lapaz-simulacion.git
-   cd represas-lapaz-simulacion
-   ```
-
-2. **Crear entorno virtual e instalar dependencias:**
-   ```bash
-   python -m venv venv
-   # En Windows:
-   venv\Scripts\activate
-   # En Linux/Mac:
-   source venv/bin/activate
-
-   pip install -r requirements.txt
-   ```
-
-3. **Ejecutar la aplicación:**
-   ```bash
-   # Si tienes PostgreSQL local configurado:
-   # set DATABASE_URL=postgresql://postgres:password@localhost:5432/represas_db
-   
-   # O ejecutar directamente (usa SQLite local por defecto para pruebas rápidas):
-   python app.py
-   ```
-4. Abrir en el navegador: `http://localhost:5000`
-
----
-
-## ☁️ 9. Despliegue Gratuito en la Nube (Render.com)
-Para cumplir con el **Entregable 1 (URL pública sin instalación)** y **Base de Datos PostgreSQL**:
-1. Sube tu código a un repositorio público en **GitHub**.
-2. Entra a [Render.com](https://render.com) (gratis).
-3. Crea un **New PostgreSQL Database** (copia la "Internal Database URL").
-4. Crea un **New Web Service** conectando tu repositorio GitHub:
-   * **Runtime:** Python 3
-   * **Build Command:** `pip install -r requirements.txt`
-   * **Start Command:** `gunicorn app:app`
-   * **Environment Variables:** Añade `DATABASE_URL` con la URL de tu base de datos PostgreSQL.
-5. ¡Listo! Render te dará tu enlace público HTTPS funcionando.
-
----
-
-## ⏱️ 10. Guion del Video Explicativo de 1 Minuto (60 Segundos)
-
-* **00:00 - 00:10 (Presentación y Contexto):**  
-  *"Hola, soy [Tu Nombre], estudiante de Ingeniería de Software. Para este desafío modelé la reserva de agua de la represa de Incachaca en La Paz frente a las sequías del Fenómeno de El Niño."*
-* **00:10 - 00:25 (Modelo Matemático y Solución):**  
-  *"Formulé una EDO de primer orden por balance de masa: dV/dt = Q_in - k*V, con condición inicial V(0)=4.5 Mm³. Obtuve su solución analítica exacta de forma exponencial y comprobé que cumple la ecuación."*
-* **00:25 - 00:45 (Demostración de la App y Comparación):**  
-  *(Muestras la pantalla de la app web)*: *"Desarrollé esta aplicación web con Flask y PostgreSQL. Al ingresar los parámetros y simular con Heun y RK4, observamos que RK4 alcanza una precisión superior con un error de apenas 10⁻⁶% frente al 0.02% de Heun."*
-* **00:45 - 00:60 (Conclusión Comunitaria y Cierre):**  
-  *"El sistema proyecta que la represa llegará al nivel de alerta roja en 60.7 días, permitiendo a EPSAS planificar racionamiento preventivo. El informe queda guardado en la base de datos PostgreSQL. Muchas gracias."*
